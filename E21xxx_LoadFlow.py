@@ -27,7 +27,7 @@ from typing import Dict, List, Optional, Tuple
 
 @dataclass
 class Bus:
-    """Student: YOUR_NAME | ID: YOUR_ID | Represents a single bus record."""
+    """Student: BANDARA B.S.M.L.U | ID: E/21/047 | Represents a single bus record."""
     number: int
     base_kv: float
     bus_type: str  # "SLACK", "PV", "PQ"
@@ -35,12 +35,12 @@ class Bus:
     qd_mvar: float = 0.0
     pg_mw: float = 0.0
     v_spec: float = 1.0
-    qmax_mvar: float = 9999.0
-    qmin_mvar: float = -9999.0
+    qmax_mvar: float = 9999.99
+    qmin_mvar: float = -9999.99
 
 @dataclass
 class Branch:
-    """Student: YOUR_NAME | ID: YOUR_ID | Represents a line or transformer."""
+    """Student: BANDARA B.S.M.L.U | ID: E/21/047| Represents a line or transformer."""
     from_bus: int
     to_bus: int
     r_pu: float
@@ -51,7 +51,7 @@ class Branch:
 # -------------------------- Utility Functions --------------------------
 
 def try_numpy_solve(matrix: List[List[complex]], rhs: List[complex]) -> List[complex]:
-    """Student: YOUR_NAME | ID: YOUR_ID | Solve linear system using numpy if available, else fallback."""
+    """Student: BANDARA B.S.M.L.U | ID: E/21/047 | Solve linear system using numpy if available, else fallback."""
     try:
         import numpy as np  # type: ignore
 
@@ -63,7 +63,7 @@ def try_numpy_solve(matrix: List[List[complex]], rhs: List[complex]) -> List[com
         return gaussian_elimination(matrix, rhs)
 
 def gaussian_elimination(matrix: List[List[complex]], rhs: List[complex]) -> List[complex]:
-    """Student: YOUR_NAME | ID: YOUR_ID | Basic Gaussian elimination with partial pivoting (complex-safe)."""
+    """Student: BANDARA B.S.M.L.U  | ID: E/21/047 | Basic Gaussian elimination with partial pivoting (complex-safe)."""
     n = len(rhs)
     # Create augmented matrix
     aug = [list(row) + [rhs[i]] for i, row in enumerate(matrix)]
@@ -89,7 +89,7 @@ def gaussian_elimination(matrix: List[List[complex]], rhs: List[complex]) -> Lis
 # -------------------------- Data Loading --------------------------
 
 def default_system_data() -> Tuple[List[Bus], List[Branch]]:
-    """Student: YOUR_NAME | ID: YOUR_ID | Returns inline IEEE 9-bus data (per-unit on 100 MVA)."""
+    """Student: BANDARA B.S.M.L.U  | ID: E/21/047 | Returns inline IEEE 9-bus data (per-unit on 100 MVA)."""
     buses = [
         Bus(1, 16.5, "SLACK", pd_mw=0.0, qd_mvar=0.0, pg_mw=71.6448, v_spec=1.04),
         Bus(2, 18.0, "PV", pd_mw=0.0, qd_mvar=0.0, pg_mw=163.0, v_spec=1.025),
@@ -118,7 +118,7 @@ def default_system_data() -> Tuple[List[Bus], List[Branch]]:
     return buses, branches
 
 def read_branch_csv(path: str) -> List[Branch]:
-    """Student: YOUR_NAME | ID: YOUR_ID | Read branch/line data from CSV with columns: from,to,r,x,g,b."""
+    """Student: BANDARA B.S.M.L.U | ID: E/21/047 | Read branch/line data from CSV with columns: from,to,r,x,g,b."""
     rows: List[Branch] = []
     with open(path, newline="", encoding="utf-8") as f:
         reader = csv.DictReader(f)
@@ -136,7 +136,7 @@ def read_branch_csv(path: str) -> List[Branch]:
     return rows
 
 def read_bus_csv(path: str, bus_types: Dict[int, str], pg: Dict[int, float], vd: Dict[int, float], qmax: Dict[int, float], qmin: Dict[int, float]) -> List[Bus]:
-    """Student: YOUR_NAME | ID: YOUR_ID | Read bus data; user provides type/gen maps separately for flexibility."""
+    """Student: BANDARA B.S.M.L.U | ID: E/21/047 | Read bus data; user provides type/gen maps separately for flexibility."""
     buses: List[Bus] = []
     with open(path, newline="", encoding="utf-8") as f:
         reader = csv.DictReader(f)
@@ -151,8 +151,8 @@ def read_bus_csv(path: str, bus_types: Dict[int, str], pg: Dict[int, float], vd:
                     qd_mvar=float(row.get("qd", 0.0) or 0.0),
                     pg_mw=pg.get(num, 0.0),
                     v_spec=vd.get(num, 1.0),
-                    qmax_mvar=qmax.get(num, 9999.0),
-                    qmin_mvar=qmin.get(num, -9999.0),
+                    qmax_mvar=qmax.get(num, 9999.99),
+                    qmin_mvar=qmin.get(num, -9999.99),
                 )
             )
     return buses
@@ -160,7 +160,7 @@ def read_bus_csv(path: str, bus_types: Dict[int, str], pg: Dict[int, float], vd:
 # -------------------------- Y-Bus Construction --------------------------
 
 def build_ybus(buses: List[Bus], branches: List[Branch]) -> List[List[complex]]:
-    """Student: YOUR_NAME | ID: YOUR_ID | Construct the nodal admittance matrix Ybus."""
+    """Student: BANDARA B.S.M.L.U  | ID: E/21/047 | Construct the nodal admittance matrix Ybus."""
     n = len(buses)
     idx = {bus.number: i for i, bus in enumerate(buses)}
     ybus = [[0j for _ in range(n)] for _ in range(n)]
@@ -185,7 +185,7 @@ def build_ybus(buses: List[Bus], branches: List[Branch]) -> List[List[complex]]:
 # -------------------------- Power Calculations --------------------------
 
 def power_injections(ybus: List[List[complex]], voltages: List[complex]) -> Tuple[List[float], List[float]]:
-    """Student: YOUR_NAME | ID: YOUR_ID | Compute P and Q injections from current voltages."""
+    """Student: BANDARA B.S.M.L.U  | ID: E/21/047 | Compute P and Q injections from current voltages."""
     n = len(voltages)
     P = [0.0] * n
     Q = [0.0] * n
@@ -196,7 +196,7 @@ def power_injections(ybus: List[List[complex]], voltages: List[complex]) -> Tupl
     return P, Q
 
 def complex_sum_conj(row: List[complex], voltages: List[complex]) -> complex:
-    """Student: YOUR_NAME | ID: YOUR_ID | Helper: sum(Y_ij * V_j) with conjugate handling."""
+    """Student: BANDARA B.S.M.L.U  | ID: E/21/047 | Helper: sum(Y_ij * V_j) with conjugate handling."""
     total = 0j
     for y, v in zip(row, voltages):
         total += y * v
@@ -214,7 +214,7 @@ def assemble_jacobian(
     pv_index: List[int],
     pq_index: List[int],
 ) -> List[List[complex]]:
-    """Student: YOUR_NAME | ID: YOUR_ID | Build J1–J4 blocks and assemble full Jacobian."""
+    """Student: BANDARA B.S.M.L.U | ID: E/21/047 | Build J1–J4 blocks and assemble full Jacobian."""
     n = len(buses)
     g = [[y.real for y in row] for row in ybus]
     b = [[y.imag for y in row] for row in ybus]
@@ -271,7 +271,7 @@ def newton_raphson_pf(
     max_iter: int = 15,
     flat_start: bool = True,
 ) -> Tuple[List[complex], List[float], List[float], List[Dict[str, float]]]:
-    """Student: YOUR_NAME | ID: YOUR_ID | Solve load flow and return voltages, P, Q, iteration log."""
+    """Student: BANDARA B.S.M.L.U | ID: E/21/047 | Solve load flow and return voltages, P, Q, iteration log."""
     n = len(buses)
     ybus = build_ybus(buses, branches)
 
@@ -342,7 +342,7 @@ def compute_line_flows(
     ybus: List[List[complex]],
     voltages: List[complex],
 ) -> Tuple[List[Dict[str, float]], float]:
-    """Student: YOUR_NAME | ID: YOUR_ID | Compute per-branch power flows and total loss (MW)."""
+    """Student: BANDARA B.S.M.L.U  | ID: E/21/047 | Compute per-branch power flows and total loss (MW)."""
     idx = {bus.number: i for i, bus in enumerate(buses)}
     flows: List[Dict[str, float]] = []
     total_loss_mw = 0.0
@@ -377,7 +377,7 @@ def compute_line_flows(
 # -------------------------- Demonstration Runner --------------------------
 
 def pretty_voltage_table(buses: List[Bus], voltages: List[complex]) -> str:
-    """Student: YOUR_NAME | ID: YOUR_ID | Format bus voltages for display."""
+    """Student: BANDARA B.S.M.L.U | ID: E/21/047 | Format bus voltages for display."""
     lines = ["Bus | |V| (pu) | Angle (deg)", "----|----------|------------"]
     for bus, V in zip(buses, voltages):
         mag = abs(V)
@@ -386,14 +386,14 @@ def pretty_voltage_table(buses: List[Bus], voltages: List[complex]) -> str:
     return "\n".join(lines)
 
 def run_demo():
-    """Student: YOUR_NAME | ID: YOUR_ID | Run sample power flow on IEEE 9-bus and print iteration 2 results."""
+    """Student: BANDARA B.S.M.L.U | ID: E/21/047 | Run sample power flow on IEEE 9-bus and print iteration 2 results."""
     buses, branches = default_system_data()
     voltages, P_inj, Q_inj, log = newton_raphson_pf(buses, branches, tol=1e-4, max_iter=15)
 
     ybus = build_ybus(buses, branches)
     flows, total_loss_mw = compute_line_flows(branches, buses, ybus, voltages)
 
-    print("Student ID: YOUR_ID")
+    print("Student ID: E/21/047 | Name: BANDARA B.S.M.L.U")
     print("Iteration log (per-unit mismatches):")
     for rec in log:
         print(f"Iter {rec['iter']:2d}: max mismatch = {rec['max_mismatch_pu']:.5f}, Vmin={rec['v_min']:.4f}, Vmax={rec['v_max']:.4f}")
