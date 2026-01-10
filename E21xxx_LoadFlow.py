@@ -374,6 +374,154 @@ def compute_line_flows(
 
     return flows, total_loss_mw
 
+# -------------------------- Results Export --------------------------
+
+def run_power_flow() -> Tuple[List[Bus], List[complex], List[Dict[str, float]], float, List[Dict[str, float]]]:
+    """Student: BANDARA B.S.M.L.U | ID: E/21/047 | Execute NR PF and return data for external comparison."""
+    buses, branches = default_system_data()
+    voltages, _, _, log = newton_raphson_pf(buses, branches, tol=1e-4, max_iter=15)
+    ybus = build_ybus(buses, branches)
+    flows, total_loss_mw = compute_line_flows(branches, buses, ybus, voltages)
+    return buses, voltages, flows, total_loss_mw, log
+
+def write_results(prefix: str = "nr_results") -> None:
+    """Student: BANDARA B.S.M.L.U | ID: E/21/047 | Write bus voltages, line flows, and iteration log to CSV files."""
+    buses, voltages, flows, total_loss_mw, log = run_power_flow()
+
+    with open(f"{prefix}_bus.csv", "w", newline="", encoding="utf-8") as f:
+        w = csv.writer(f)
+        w.writerow(["bus", "Vmag_pu", "angle_deg"])
+        for bus, V in zip(buses, voltages):
+            w.writerow([bus.number, abs(V), math.degrees(cmath.phase(V))])
+
+    with open(f"{prefix}_flows.csv", "w", newline="", encoding="utf-8") as f:
+        w = csv.writer(f)
+        w.writerow(["from", "to", "P_from_MW", "Q_from_Mvar", "P_to_MW", "Q_to_Mvar", "loss_MW"])
+        for row in flows:
+            w.writerow([
+                row["from"],
+                row["to"],
+                row["P_from_MW"],
+                row["Q_from_Mvar"],
+                row["P_to_MW"],
+                row["Q_to_Mvar"],
+                row["loss_MW"],
+            ])
+        w.writerow(["TOTAL", "", "", "", "", "", total_loss_mw])
+
+    with open(f"{prefix}_iter.csv", "w", newline="", encoding="utf-8") as f:
+        w = csv.writer(f)
+        w.writerow(["iter", "max_mismatch_pu", "v_min", "v_max"])
+        for rec in log:
+            w.writerow([rec["iter"], rec["max_mismatch_pu"], rec["v_min"], rec["v_max"]])
+
+# -------------------------- Sensitivity Analysis --------------------------
+
+def _clone_bus(b: Bus, pd_scale: float = 1.0, qd_scale: float = 1.0) -> Bus:
+    """Student: BANDARA B.S.M.L.U | ID: E/21/047 | Copy a Bus, scaling P/Q load if applied."""
+    return Bus(
+        number=b.number,
+        base_kv=b.base_kv,
+        bus_type=b.bus_type,
+        pd_mw=b.pd_mw * pd_scale,
+        qd_mvar=b.qd_mvar * qd_scale,
+        pg_mw=b.pg_mw,
+        v_spec=b.v_spec,
+        qmax_mvar=b.qmax_mvar,
+        qmin_mvar=b.qmin_mvar,
+    )
+
+def perform_voltage_sensitivity(
+    deltas: Tuple[float, float, float] = (-0.1, 0.0, 0.1),
+    load_buses: Optional[List[int]] = None,
+) -> Tuple[List[Dict[str, float]], List[Dict[str, float]], List[Dict[str, float]]]:
+    """Student: BANDARA B.S.M.L.U | ID: E/21/047 | Run ±10% P/Q load perturbations per load bus and collect stats.
+
+    Returns:
+        case_rows: per-scenario bus voltages
+        stats_rows: per varied-bus, per observed-bus variance/std of |V|
+        rank_rows: per varied-bus aggregate metrics to rank influence
+    """
+    base_buses, branches = default_system_data()
+    if load_buses is None:
+        load_buses = [b.number for b in base_buses if b.bus_type == "PQ" and (b.pd_mw != 0.0 or b.qd_mvar != 0.0)]
+
+    case_rows: List[Dict[str, float]] = []
+    stats_rows: List[Dict[str, float]] = []
+    rank_rows: List[Dict[str, float]] = []
+
+    for lb in load_buses:
+        # Collect volt mags for this target bus across deltas
+        bus_voltage_traces: Dict[int, List[float]] = {bus.number: [] for bus in base_buses}
+
+        for d in deltas:
+            scale = 1.0 + d
+            buses_scaled = [_clone_bus(b, pd_scale=scale, qd_scale=scale) if b.number == lb else _clone_bus(b) for b in base_buses]
+            voltages, _, _, _ = newton_raphson_pf(buses_scaled, branches, tol=1e-4, max_iter=15)
+            for bus, V in zip(buses_scaled, voltages):
+                mag = abs(V)
+                ang_deg = math.degrees(cmath.phase(V))
+                case_rows.append({
+                    "varied_bus": lb,
+                    "delta_pct": d * 100.0,
+                    "bus": bus.number,
+                    "Vmag_pu": mag,
+                    "angle_deg": ang_deg,
+                })
+                bus_voltage_traces[bus.number].append(mag)
+
+        # Compute variance/std for each observed bus
+        max_std = -1.0
+        max_std_bus = None
+        std_sum = 0.0
+        count = 0
+        for obs_bus, values in bus_voltage_traces.items():
+            mean_v = sum(values) / len(values)
+            var_v = sum((v - mean_v) ** 2 for v in values) / len(values)
+            std_v = math.sqrt(var_v)
+            stats_rows.append({
+                "varied_bus": lb,
+                "observed_bus": obs_bus,
+                "variance": var_v,
+                "std": std_v,
+            })
+            std_sum += std_v
+            count += 1
+            if std_v > max_std:
+                max_std = std_v
+                max_std_bus = obs_bus
+
+        rank_rows.append({
+            "varied_bus": lb,
+            "max_std_any_bus": max_std,
+            "max_std_at_bus": max_std_bus,
+            "mean_std_all_buses": std_sum / max(1, count),
+        })
+
+    return case_rows, stats_rows, rank_rows
+
+def write_sensitivity_results(prefix: str = "sens_results") -> None:
+    """Student: BANDARA B.S.M.L.U | ID: E/21/047 | Export sensitivity cases, stats, and ranking to CSV files."""
+    case_rows, stats_rows, rank_rows = perform_voltage_sensitivity()
+
+    with open(f"{prefix}_cases.csv", "w", newline="", encoding="utf-8") as f:
+        w = csv.writer(f)
+        w.writerow(["varied_bus", "delta_pct", "bus", "Vmag_pu", "angle_deg"])
+        for r in case_rows:
+            w.writerow([r["varied_bus"], r["delta_pct"], r["bus"], r["Vmag_pu"], r["angle_deg"]])
+
+    with open(f"{prefix}_stats.csv", "w", newline="", encoding="utf-8") as f:
+        w = csv.writer(f)
+        w.writerow(["varied_bus", "observed_bus", "variance", "std"])
+        for r in stats_rows:
+            w.writerow([r["varied_bus"], r["observed_bus"], r["variance"], r["std"]])
+
+    with open(f"{prefix}_ranking.csv", "w", newline="", encoding="utf-8") as f:
+        w = csv.writer(f)
+        w.writerow(["varied_bus", "max_std_any_bus", "max_std_at_bus", "mean_std_all_buses"])
+        for r in rank_rows:
+            w.writerow([r["varied_bus"], r["max_std_any_bus"], r["max_std_at_bus"], r["mean_std_all_buses"]])
+
 # -------------------------- Demonstration Runner --------------------------
 
 def pretty_voltage_table(buses: List[Bus], voltages: List[complex]) -> str:
