@@ -2,23 +2,23 @@
 
 ```mermaid
 flowchart TD
-    A([START]) --> B["Load IEEE 9-bus data\ndefault_system_data()\nLines 92–118"]
-    B --> C["Build Y-bus matrix\nbuild_ybus()\nLines 148–168"]
-    C --> D["Flat start: V=1.0 pu, δ=0°\nIdentify SLACK / PV / PQ\nnewton_raphson_pf()\nLines 207–225"]
-    D --> E["Set iteration counter\nk = 1\nLine 228"]
-    E --> F["Form complex voltages\nV_i = |V_i| ∠ δ_i\nLine 229"]
-    F --> G["Compute P, Q injections\npower_injections()\nLines 172–180"]
-    G --> H["Compute scheduled\nP_spec, Q_spec\nLines 232–233"]
-    H --> I["Build mismatch vector\nΔP non-slack, ΔQ PQ\nLines 236–239"]
-    I --> J{"max|mismatch| < 1e-4 ?\nLine 242"}
-    J -- Yes --> K["Store final voltages\nLine 253"]
-    J -- No --> L["Assemble Jacobian J1–J4\nassemble_jacobian()\nLines 188–205"]
-    L --> M["Solve J · Δx = mismatch\ntry_numpy_solve() or\ngaussian_elimination()\nLine 247"]
-    M --> N["Update δ non-slack\nUpdate |V| PQ only\nLines 250–252"]
-    N --> O["k = k + 1\nLine 228"]
+    A([START]) --> B["Load IEEE 9-bus data<br>default_system_data()<br>Lines 91-118"]
+    B --> C["Build Y-bus matrix<br>build_ybus()<br>Lines 162-183"]
+    C --> D["Flat start: V=1.0 pu, d=0<br>Identify SLACK / PV / PQ<br>newton_raphson_pf()<br>Lines 275-296"]
+    D --> E["Set iteration counter<br>k = 1<br>Line 298"]
+    E --> F["Form complex voltages<br>Vi = |Vi| exp(j di)<br>Line 299"]
+    F --> G["Compute P, Q injections<br>power_injections()<br>Lines 187-197"]
+    G --> H["Compute scheduled<br>P_spec, Q_spec<br>Lines 302-303"]
+    H --> I["Build mismatch vector<br>dP non-slack, dQ PQ<br>Lines 306-311"]
+    I --> J{"max mismatch < 1e-4 ?<br>Line 320"}
+    J -- Yes --> K["Store final voltages<br>Line 336"]
+    J -- No --> L["Assemble Jacobian J1-J4<br>assemble_jacobian()<br>Lines 207-264"]
+    L --> M["Solve J . dx = mismatch<br>try_numpy_solve() Lines 53-63<br>gaussian_elimination() Lines 65-87<br>Line 324"]
+    M --> N["Update d non-slack<br>Update |V| PQ only<br>Lines 327-331"]
+    N --> O["k = k + 1<br>Line 298"]
     O --> F
-    K --> P["Compute line flows and losses\ncompute_line_flows()\nLines 258–289"]
-    P --> Q["Print / Export results\nBus voltages, angles\nLine flows, total loss\nrun_demo()\nLines 308–340"]
+    K --> P["Compute line flows and losses<br>compute_line_flows()<br>Lines 339-377"]
+    P --> Q["Print / Export results<br>Bus voltages, angles<br>Line flows, total loss<br>run_demo()<br>Lines 536-569"]
     Q --> R([END])
 
     style A fill:#2d6a4f,color:#fff,stroke:#1b4332
