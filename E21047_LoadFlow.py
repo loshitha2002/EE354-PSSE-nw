@@ -20,6 +20,7 @@ from __future__ import annotations
 import cmath
 import csv
 import math
+from datetime import datetime
 from dataclasses import dataclass
 from typing import Dict, List, Optional, Tuple
 
@@ -541,28 +542,67 @@ def run_demo():
     ybus = build_ybus(buses, branches)
     flows, total_loss_mw = compute_line_flows(branches, buses, ybus, voltages)
 
-    print("Student ID: E/21/047 | Name: BANDARA B.S.M.L.U")
-    print("Iteration log (per-unit mismatches):")
+    timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+    print("=" * 72)
+    print("  EE354 POWER ENGINEERING - NEWTON-RAPHSON LOAD FLOW ANALYSIS")
+    print("  IEEE 9-Bus Test System | 100 MVA Base")
+    print("=" * 72)
+    print(f"  Student ID   : E/21/047")
+    print(f"  Student Name : BANDARA B.S.M.L.U")
+    print(f"  Timestamp    : {timestamp}")
+    print("=" * 72)
+
+    # --- Iteration Log ---
+    print("\n" + "-" * 72)
+    print("  ITERATION LOG (Flat Start, Tolerance = 1e-4 p.u.)")
+    print("-" * 72)
+    print(f"  {'Iter':<6} {'Max Mismatch (p.u.)':<22} {'V_min (p.u.)':<15} {'V_max (p.u.)':<15}")
+    print("  " + "-" * 58)
     for rec in log:
-        print(f"Iter {rec['iter']:2d}: max mismatch = {rec['max_mismatch_pu']:.5f}, Vmin={rec['v_min']:.4f}, Vmax={rec['v_max']:.4f}")
+        print(f"  {rec['iter']:<6d} {rec['max_mismatch_pu']:<22.6f} {rec['v_min']:<15.4f} {rec['v_max']:<15.4f}")
+    print(f"\n  >> Converged in {len(log)} iterations.")
 
-    # Show 2nd iteration voltages if available
+    # --- 2nd Iteration Voltages ---
     if len(log) >= 2:
-        print("\nVoltages at end of iteration 2 (flat start reference):")
-        # Re-run up to 2 iterations to extract values
+        print("\n" + "-" * 72)
+        print("  BUS VOLTAGES AFTER ITERATION 2 (Flat Start)")
+        print("-" * 72)
         volt2, _, _, _ = newton_raphson_pf(buses, branches, tol=1e-12, max_iter=2)
-        print(pretty_voltage_table(buses, volt2))
+        print(f"  {'Bus':<6} {'|V| (p.u.)':<15} {'Angle (deg)':<15}")
+        print("  " + "-" * 36)
+        for bus, V in zip(buses, volt2):
+            print(f"  {bus.number:<6d} {abs(V):<15.4f} {math.degrees(cmath.phase(V)):<15.4f}")
 
-    print("\nFinal converged voltages:")
-    print(pretty_voltage_table(buses, voltages))
-    print(f"\nTotal system loss: {total_loss_mw:.4f} MW")
+    # --- Final Converged Voltages ---
+    print("\n" + "-" * 72)
+    print("  FINAL CONVERGED BUS VOLTAGES")
+    print("-" * 72)
+    print(f"  {'Bus':<6} {'|V| (p.u.)':<15} {'Angle (deg)':<15}")
+    print("  " + "-" * 36)
+    for bus, V in zip(buses, voltages):
+        print(f"  {bus.number:<6d} {abs(V):<15.4f} {math.degrees(cmath.phase(V)):<15.4f}")
 
-    print("\nSample line flows (MW/Mvar):")
+    # --- Line Flows ---
+    print("\n" + "-" * 72)
+    print("  LINE POWER FLOWS AND LOSSES (100 MVA Base)")
+    print("-" * 72)
+    print(f"  {'From':<6} {'To':<6} {'P_from(MW)':<12} {'Q_from(Mvar)':<14} {'P_to(MW)':<12} {'Q_to(Mvar)':<14} {'Loss(MW)':<10}")
+    print("  " + "-" * 68)
     for f in flows:
         print(
-            f"{f['from']:d}->{f['to']:d}: P_from={f['P_from_MW']:.3f} MW, Q_from={f['Q_from_Mvar']:.3f} Mvar, "
-            f"P_to={f['P_to_MW']:.3f} MW, Q_to={f['Q_to_Mvar']:.3f} Mvar, loss={f['loss_MW']:.3f} MW"
+            f"  {f['from']:<6d} {f['to']:<6d} {f['P_from_MW']:<12.3f} {f['Q_from_Mvar']:<14.3f} "
+            f"{f['P_to_MW']:<12.3f} {f['Q_to_Mvar']:<14.3f} {f['loss_MW']:<10.3f}"
         )
+    print("  " + "-" * 68)
+    print(f"  {'TOTAL SYSTEM LOSS':>62s} {total_loss_mw:<10.3f}")
+
+    # --- Footer ---
+    print("\n" + "=" * 72)
+    print(f"  Program executed successfully at {timestamp}")
+    print(f"  Student ID: E/21/047 | BANDARA B.S.M.L.U")
+    print("=" * 72)
+
 
 if __name__ == "__main__":
     run_demo()
