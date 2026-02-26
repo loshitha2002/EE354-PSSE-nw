@@ -53,33 +53,65 @@
 \titleformat{\subsection}{\normalsize\bfseries}{\thesubsection}{0.5em}{}
 
 % ============================================================
+
+
+% ====================== COVER PAGE =========================
+% ...existing code...
+
+% ============================================================
+% ...existing code...
+
+% ============================================================
 \begin{document}
 
 % ====================== COVER PAGE =========================
 \begin{titlepage}
+\newgeometry{margin=2.5cm}
+
 \centering
-\vspace*{2cm}
 
-{\Large\textbf{University of Peradeniya}}\\[0.3cm]
-{\large Faculty of Engineering}\\[0.3cm]
-{\large Department of Electrical and Electronic Engineering}\\[1.5cm]
+% University header
+\rule{\textwidth}{2pt}\\[0.5cm]
+{\Large\textsc{University of Peradeniya}}\\[0.2cm]
+{\normalsize\textsc{Faculty of Engineering}}\\[0.15cm]
+{\normalsize\textsc{Department of Electrical and Electronic Engineering}}\\[0.5cm]
+\rule{\textwidth}{2pt}
 
-\rule{\textwidth}{1pt}\\[0.4cm]
-{\LARGE\textbf{Development and Comparative Analysis of\\Load Flow Algorithms on the IEEE 9-Bus Test System}}\\[0.3cm]
-\rule{\textwidth}{1pt}\\[1.5cm]
+\vspace{2cm}
 
-{\large\textbf{Course:} EE354 – Power Engineering}\\[0.5cm]
-{\large\textbf{Assignment:} Load Flow Assignment}\\[1.5cm]
+% Title
+{\huge\bfseries Development and Comparative\\[0.3cm]
+Analysis of Load Flow Algorithms\\[0.3cm]
+on the IEEE 9-Bus Test System}
 
-\begin{tabular}{ll}
-\textbf{Student Name:} & BANDARA B.S.M.L.U \\[0.3cm]
-\textbf{Registration No:} & E/21/047 \\[0.3cm]
-\textbf{Date:} & February 2026 \\
+\vspace{1cm}
+\rule{0.4\textwidth}{0.5pt}
+\vspace{1.5cm}
+
+% Course
+{\Large EE354 – Power Engineering}\\[0.4cm]
+{\large Load Flow Assignment}
+
+\vspace{2cm}
+
+% Student info
+\begin{tabular}{r l}
+\textsc{Name}           & : \quad BANDARA B.S.M.L.U \\[0.4cm]
+\textsc{Reg.\ No.}      & : \quad E/21/047 \\[0.4cm]
+\textsc{Date}           & : \quad February 2026 \\
 \end{tabular}
 
 \vfill
-{\small Submitted in partial fulfilment of EE354 coursework requirements.}
+
+% Bottom
+
 \end{titlepage}
+
+% ====================== ABSTRACT ===========================
+% ...existing code...
+
+% ====================== ABSTRACT ===========================
+% ...existing code...
 
 % ====================== ABSTRACT ===========================
 \newpage
@@ -127,7 +159,7 @@ The IEEE 9-bus data (Appendix~\ref{app:data}) are coded directly in the Python s
 \toprule
 Bus & Type & $|V|$ (p.u.) & $P_G$ (MW) & $P_D$ (MW) & $Q_D$ (Mvar) \\
 \midrule
-1 & Slack & 1.040 & 71.64$^*$ & 0 & 0 \\
+1 & Slack & 1.040 & 71.6448 & 0 & 0 \\
 2 & PV    & 1.025 & 163.00   & 0 & 0 \\
 3 & PV    & 1.025 & 85.00    & 0 & 0 \\
 4 & PQ    & —     & 0        & 0 & 0 \\
@@ -297,13 +329,10 @@ Bus & $|V|$ (p.u.) & $\delta$ (deg) \\
 \subsubsection{Program Flowchart}
 Figure~\ref{fig:flowchart} shows the flowchart of the Newton–Raphson load flow program with code line number references.
 
-\subsubsection{Program Flowchart}
-Figure~\ref{fig:flowchart} shows the flowchart of the Newton–Raphson load flow program with code line number references.
-
 \begin{figure}[H]
 \centering
 \includegraphics[width=0.75\textwidth,height=0.88\textheight,keepaspectratio]{flowchart.png}
-\caption{Flowchart of the Full Newton–Raphson load flow program. Each box references the corresponding line numbers in \texttt{E21xxx\_LoadFlow.py}.}
+\caption{Flowchart of the Full Newton–Raphson load flow program. Each box references the corresponding line numbers in \texttt{E21047\_LoadFlow.py}.}
 \label{fig:flowchart}
 \end{figure}
 
@@ -314,28 +343,29 @@ Figure~\ref{fig:flowchart} shows the flowchart of the Newton–Raphson load flow
 
 \begin{table}[H]
 \centering
-\caption{Bus voltage comparison: Python NR vs.\ PSS/E methods.}
+\caption{Bus voltage comparison: Python NR vs.\ PSS/E Newton--Raphson.}
 \label{tab:pssecomp}
 \small
-\begin{tabular}{c cc cc cc cc}
+\begin{tabular}{c cc cc}
 \toprule
-& \multicolumn{2}{c}{Python NR} & \multicolumn{2}{c}{PSS/E NR} & \multicolumn{2}{c}{PSS/E GS} & \multicolumn{2}{c}{PSS/E FDLF} \\
-\cmidrule(lr){2-3}\cmidrule(lr){4-5}\cmidrule(lr){6-7}\cmidrule(lr){8-9}
-Bus & $|V|$ & $\delta$ & $|V|$ & $\delta$ & $|V|$ & $\delta$ & $|V|$ & $\delta$ \\
+& \multicolumn{2}{c}{Python NR} & \multicolumn{2}{c}{PSS/E NR} \\
+\cmidrule(lr){2-3}\cmidrule(lr){4-5}
+Bus & $|V|$ (p.u.) & $\delta$ (deg) & $|V|$ (p.u.) & $\delta$ (deg) \\
 \midrule
-1 & 1.0400 &  0.00 & — & — & — & — & — & — \\
-2 & 1.0250 &  9.28 & — & — & — & — & — & — \\
-3 & 1.0250 &  4.66 & — & — & — & — & — & — \\
-4 & 1.0258 & $-$2.22 & — & — & — & — & — & — \\
-5 & 0.9956 & $-$3.99 & — & — & — & — & — & — \\
-6 & 1.0127 & $-$3.69 & — & — & — & — & — & — \\
-7 & 1.0258 &  3.72 & — & — & — & — & — & — \\
-8 & 1.0159 &  0.73 & — & — & — & — & — & — \\
-9 & 1.0324 &  1.97 & — & — & — & — & — & — \\
+1 & 1.0400 & 0.0000 &  1.0400 & 0.0000 \\
+2 & 1.0250 & 9.2800 &  1.0250 & 9.2800 \\
+3 & 1.0250 & 4.6648 &  1.0250 & 4.6648 \\
+4 & 1.0258 & -2.2168 & 1.0258 & -2.2168 \\
+5 & 0.9956 & -3.9888 & 0.9956 & -3.9888\\
+6 & 1.0127 & -3.6874 & 1.0127 & -3.6874 \\
+7 & 1.0258 & 3.7197 &  1.0258 & 3.7197 \\
+8 & 1.0159 & 0.7275 &  1.0159 & 0.7275\\
+9 & 1.0324 & 1.9667 &  1.0324 & 1.9667 \\
 \bottomrule
-\multicolumn{9}{l}{\footnotesize \textit{Fill in PSS/E columns from your PSS/E simulation results.}}
 \end{tabular}
 \end{table}
+
+
 
 \subsubsection{Convergence Comparison}
 
@@ -348,31 +378,107 @@ Bus & $|V|$ & $\delta$ & $|V|$ & $\delta$ & $|V|$ & $\delta$ & $|V|$ & $\delta$ 
 Method & Iterations & Max Mismatch (p.u.) & Converged? \\
 \midrule
 Python NR    & 4 & $3.4\times10^{-7}$ & Yes \\
-PSS/E NR     & — & — & — \\
-PSS/E GS     & — & — & — \\
-PSS/E FDLF   & — & — & — \\
+PSS/E NR     & 3 & 0.00 & Yes \\
+PSS/E GS     & 18 & 0.85 & Yes \\
+PSS/E FDLF   & 3 & 0.04 & Yes \\
 \bottomrule
-\multicolumn{4}{l}{\footnotesize \textit{Fill in PSS/E values from your runs.}}
+
 \end{tabular}
 \end{table}
+% ---------- 3.2  PSS/E Verification and Comparison (Task 2) ----------
 
-\subsubsection{Deviation Analysis}
+
+\subsection{Convergence Profiles}
+
+\subsubsection{Python Newton–Raphson}
+Table~\ref{tab:py-nr-conv} shows the iteration-by-iteration convergence of the developed program.
 
 \begin{table}[H]
 \centering
-\caption{Maximum deviations: Python NR vs.\ PSS/E NR.}
-\label{tab:deviations}
-\begin{tabular}{lcc}
+\caption{Python NR Convergence History}
+\label{tab:py-nr-conv}
+\begin{tabular}{cc}
 \toprule
-Metric & Max Value & At Bus \\
+Iteration & Max Mismatch (p.u.) \\
 \midrule
-$|\Delta|V||$ (p.u.) & — & — \\
-$|\Delta\delta|$ (deg) & — & — \\
-$|\Delta P_{\text{loss}}|$ (MW) & — & — \\
+1 & 1.63000000 \\
+2 & 0.18751591 \\
+3 & 0.00214715 \\
+4 & 0.00000034 \\
 \bottomrule
-\multicolumn{3}{l}{\footnotesize \textit{Compute from your PSS/E exports.}}
 \end{tabular}
 \end{table}
+
+\subsubsection{PSS/E Newton–Raphson}
+\begin{table}[H]
+\centering
+\caption{PSS/E NR Convergence History}
+\label{tab:psse-nr-conv}
+\begin{tabular}{cccccc}
+\toprule
+Iter & Max $\Delta P$ (p.u.) & Bus & Max $\Delta Q$ (p.u.) & Bus \\
+\midrule
+0 & 1.6300 & 2 & 0.8614 & 4 \\
+1 & 0.0986 & 2 & 0.1761 & 7 \\
+2 & 0.0008 & 8 & 0.0020 & 7 \\
+3 & 0.0000 & 7 & 0.0000 & 7 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsubsection{PSS/E Fast Decoupled}
+\begin{table}[H]
+\centering
+\caption{PSS/E FDLF Convergence History}
+\label{tab:psse-fdlf-conv}
+\begin{tabular}{ccccccccc}
+\toprule
+Iter & $\Delta P$ & Bus & $\Delta Q$ & Bus & $\Delta|V|$ & Bus & $\Delta\delta$ & Bus \\
+\midrule
+0.0 & 1.6300 & 2 & 0.8614 & 4 & --- & --- & 0.17750 & 2 \\
+0.5 & 0.0164 & 5 & 0.9370 & 4 & 0.03234 & 9 & --- & --- \\
+1.0 & 0.0871 & 5 & 0.0245 & 4 & --- & --- & 0.01534 & 2 \\
+1.5 & 0.0001 & 5 & 0.0313 & 4 & 0.00200 & 6 & --- & --- \\
+2.0 & 0.0043 & 4 & 0.0001 & 6 & --- & --- & 0.00026 & 6 \\
+2.5 & 0.0000 & 4 & 0.0011 & 6 & 0.00008 & 6 & --- & --- \\
+3.0 & 0.0002 & 6 & 0.0000 & 6 & --- & --- & --- & --- \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsubsection{PSS/E Gauss–Seidel}
+\begin{table}[H]
+\centering
+\caption{PSS/E Gauss–Seidel Convergence History (Selected Iterations)}
+\label{tab:psse-gs-conv}
+\begin{tabular}{cccc}
+\toprule
+Iter & $\Delta V$/Tol & Bus & Base kV \\
+\midrule
+1 & 1632.124 & 2 & 18.000 \\
+2 & 882.996 & 4 & 230.00 \\
+3 & 624.006 & 6 & 230.00 \\
+4 & 370.803 & 7 & 230.00 \\
+5 & 271.297 & 4 & 230.00 \\
+6 & 190.699 & 9 & 230.00 \\
+7 & 121.545 & 4 & 230.00 \\
+8 & 92.306 & 7 & 230.00 \\
+9 & 59.496 & 7 & 230.00 \\
+10 & 34.407 & 9 & 230.00 \\
+11 & 23.499 & 4 & 230.00 \\
+12 & 13.922 & 7 & 230.00 \\
+13 & 9.766 & 7 & 230.00 \\
+14 & 6.402 & 7 & 230.00 \\
+15 & 3.542 & 4 & 230.00 \\
+16 & 2.219 & 9 & 230.00 \\
+17 & 1.211 & 9 & 230.00 \\
+18 & 0.871 & 7 & 230.00 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+
+
 
 % ---------- 3.3  Sensitivity Analysis ----------
 \subsection{Voltage Sensitivity Analysis (Task 3)}
@@ -624,6 +730,6 @@ From & To & R (p.u.) & X (p.u.) & G (p.u.) & B (p.u.) \\
 
 \section{Source Code Listing}
 \label{app:code}
-\lstinputlisting[caption={E21xxx\_LoadFlow.py — Full Newton–Raphson load flow program.}]{E21xxx_LoadFlow.py}
+\lstinputlisting[caption={E21047\_LoadFlow.py — Full Newton–Raphson load flow program.}]{E21xxx_LoadFlow.py}
 
 \end{document}
