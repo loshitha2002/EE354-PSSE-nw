@@ -19,7 +19,7 @@ plt.savefig('voltage_comparison.png')
 
 # Plot 2: Convergence Comparison (Iterations)
 methods = ['Python NR', 'PSS/E NR', 'PSS/E GS', 'PSS/E FDLF']
-iterations = [4, 4, 32, 12] # Replace with your actual recorded values
+iterations = [4, 4, 32, 12] 
 plt.figure(figsize=(8, 5))
 plt.bar(methods, iterations, color=['red', 'blue', 'green', 'orange'])
 plt.ylabel('Number of Iterations')
